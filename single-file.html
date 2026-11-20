@@ -1,0 +1,1068 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#f6f8f7">
+  <title>胰岛素抵抗减脂与阶梯降碳助手</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --bg: #f6f8f7;
+      --ink: #18302e;
+      --muted: #71827e;
+      --line: #e3eae7;
+      --green: #16745d;
+      --green-dark: #105743;
+      --green-soft: #e7f5ee;
+      --orange: #ef9d54;
+      --orange-soft: #fff2e6;
+      --blue: #5a91b4;
+      --blue-soft: #eaf4f9;
+      --purple: #9474bd;
+      --purple-soft: #f2edfa;
+      --red: #b64949;
+      --red-soft: #fff0ef;
+      --shadow: 0 14px 40px rgba(32, 60, 53, .06);
+    }
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--ink);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+      -webkit-font-smoothing: antialiased;
+    }
+    button, input, select { font: inherit; }
+    button { cursor: pointer; }
+    button:disabled { cursor: not-allowed; opacity: .5; }
+    button:focus-visible, input:focus-visible, select:focus-visible, summary:focus-visible {
+      outline: 3px solid #8bcbb4;
+      outline-offset: 3px;
+    }
+    [hidden] { display: none !important; }
+    .shell { width: min(1080px, 100%); margin: 0 auto; padding: 28px 24px 64px; }
+    .masthead { display: flex; align-items: center; gap: 13px; margin-bottom: 24px; }
+    .brand {
+      width: 46px; height: 46px; border-radius: 15px; display: grid; place-items: center;
+      background: var(--green); color: #fff; font-size: 19px; font-weight: 800; letter-spacing: -.05em;
+      box-shadow: 0 9px 18px rgba(22, 116, 93, .18);
+    }
+    .brand-copy { display: flex; flex-direction: column; line-height: 1.3; }
+    .brand-copy strong { font-size: 15px; letter-spacing: .01em; }
+    .brand-copy span { margin-top: 2px; color: var(--muted); font-size: 11px; }
+    .local-badge {
+      margin-left: auto; padding: 8px 12px; border: 1px solid #d6e9df; border-radius: 999px;
+      background: #eff8f2; color: #397462; font-size: 12px; font-weight: 700; white-space: nowrap;
+    }
+    .local-badge::before { content: ""; display: inline-block; width: 6px; height: 6px; margin: 0 7px 1px 0; border-radius: 50%; background: #43ac77; }
+    .intro {
+      min-height: 216px; display: flex; align-items: center; justify-content: space-between; gap: 30px;
+      padding: 34px 40px; border-radius: 28px; overflow: hidden; position: relative;
+      background: linear-gradient(122deg, #145943 0%, #1b8064 65%, #39a077 100%);
+      color: #fff; box-shadow: 0 20px 38px rgba(24, 103, 78, .13);
+    }
+    .intro::after {
+      content: ""; position: absolute; width: 300px; height: 300px; right: -95px; top: -125px;
+      border: 1px solid rgba(255, 255, 255, .23); border-radius: 50%; box-shadow: 0 0 0 50px rgba(255, 255, 255, .035), 0 0 0 100px rgba(255, 255, 255, .025);
+    }
+    .intro-copy { position: relative; z-index: 1; }
+    .eyebrow { display: block; margin-bottom: 12px; font-size: 11px; font-weight: 800; letter-spacing: .16em; text-transform: uppercase; }
+    .intro .eyebrow { color: #c8f0d8; }
+    h1 { margin: 0; font-size: clamp(28px, 4vw, 43px); line-height: 1.18; letter-spacing: -.035em; }
+    .intro p { max-width: 510px; margin: 14px 0 0; color: #e0f4e8; font-size: 14px; line-height: 1.75; }
+    .intro-art { position: relative; z-index: 1; width: 222px; flex: 0 0 222px; display: flex; align-items: end; gap: 12px; height: 135px; }
+    .intro-art span { flex: 1; display: flex; align-items: end; justify-content: center; padding-bottom: 13px; border-radius: 18px 18px 11px 11px; color: #174938; font-size: 11px; font-weight: 800; }
+    .intro-art span:nth-child(1) { height: 74%; background: #b7e5b8; }
+    .intro-art span:nth-child(2) { height: 58%; background: #e5efc4; }
+    .intro-art span:nth-child(3) { height: 100%; background: #ffd7a8; }
+    .tabs {
+      display: flex; gap: 6px; width: fit-content; max-width: 100%; margin: 24px 0;
+      padding: 5px; border: 1px solid var(--line); border-radius: 16px; background: #edf2ef;
+    }
+    .tab {
+      min-width: 128px; padding: 11px 17px; border: 0; border-radius: 11px;
+      background: transparent; color: #687e75; font-size: 14px; font-weight: 700;
+      transition: background .2s, color .2s, box-shadow .2s;
+    }
+    .tab[aria-selected="true"] { background: #fff; color: var(--green-dark); box-shadow: 0 4px 12px rgba(35, 73, 56, .09); }
+    .panel { animation: panel-in .24s ease-out; }
+    @keyframes panel-in { from { opacity: .6; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+    .content-grid { display: grid; grid-template-columns: minmax(0, 1.55fr) minmax(275px, .82fr); gap: 20px; align-items: start; }
+    .card { background: #fff; border: 1px solid var(--line); border-radius: 24px; box-shadow: var(--shadow); }
+    .form-card, .history-card, .compare-card { padding: 28px; }
+    .card-header { display: flex; align-items: flex-start; justify-content: space-between; gap: 18px; margin-bottom: 26px; }
+    .card-header h2 { margin: 0; font-size: 24px; letter-spacing: -.03em; }
+    .card-header p { margin: 7px 0 0; color: var(--muted); font-size: 13px; line-height: 1.6; }
+    .card-header .eyebrow { color: var(--green); }
+    .step-pill { flex: none; width: 35px; height: 35px; display: grid; place-items: center; border-radius: 12px; background: var(--green-soft); color: var(--green); font-size: 13px; font-weight: 800; }
+    .field-pair { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+    .field { display: flex; flex-direction: column; gap: 9px; min-width: 0; }
+    .field label, .field > span { color: #4f665e; font-size: 13px; font-weight: 700; }
+    .input-wrap { display: flex; align-items: center; border: 1px solid #d9e4df; border-radius: 13px; background: #fbfcfb; transition: border-color .2s, box-shadow .2s; }
+    .input-wrap:focus-within { border-color: #64b796; box-shadow: 0 0 0 3px rgba(85, 180, 144, .13); }
+    .input-wrap input { width: 100%; min-width: 0; height: 48px; padding: 0 13px; border: 0; outline: 0; background: transparent; color: var(--ink); font-size: 16px; }
+    .input-wrap span { padding-right: 15px; color: #91a49b; font-size: 13px; }
+    .subhead { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; margin: 28px 0 14px; }
+    .subhead h3 { margin: 0; font-size: 16px; }
+    .subhead small { color: var(--muted); font-size: 11px; }
+    .feedback-list { display: grid; gap: 11px; }
+    .feedback-row { display: grid; grid-template-columns: 92px minmax(0, 1fr) 58px; gap: 14px; align-items: center; padding: 14px; border: 1px solid #ecf0ee; border-radius: 15px; background: #fafcfb; }
+    .feedback-row label { font-size: 13px; font-weight: 700; }
+    .range-value { display: flex; align-items: center; justify-content: flex-end; gap: 5px; color: var(--green-dark); font-size: 12px; font-weight: 800; white-space: nowrap; }
+    .range-emoji { font-size: 19px; line-height: 1; }
+    input[type="range"] { appearance: none; -webkit-appearance: none; width: 100%; height: 7px; margin: 0; border-radius: 999px; background: linear-gradient(to right, #3ba687 0%, #3ba687 var(--fill, 50%), #e5ece8 var(--fill, 50%), #e5ece8 100%); cursor: pointer; }
+    input[type="range"]::-webkit-slider-thumb { appearance: none; -webkit-appearance: none; width: 20px; height: 20px; border: 4px solid #fff; border-radius: 50%; background: var(--green); box-shadow: 0 1px 7px rgba(30, 85, 62, .28); }
+    input[type="range"]::-moz-range-thumb { width: 14px; height: 14px; border: 3px solid #fff; border-radius: 50%; background: var(--green); box-shadow: 0 1px 7px rgba(30, 85, 62, .28); }
+    .select-wrap { position: relative; }
+    .select-wrap select { appearance: none; width: 100%; height: 48px; padding: 0 38px 0 13px; border: 1px solid #d9e4df; border-radius: 13px; background: #fbfcfb; color: var(--ink); font-size: 14px; }
+    .select-wrap::after { content: "⌄"; position: absolute; right: 15px; top: 6px; color: #789589; font-size: 25px; pointer-events: none; }
+    .sleep-field { margin-top: 18px; }
+    .symptom-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+    .symptom { display: flex; align-items: center; gap: 9px; min-height: 48px; padding: 11px 12px; border: 1px solid #dfe8e3; border-radius: 13px; background: #fbfcfb; font-size: 13px; font-weight: 650; cursor: pointer; transition: border-color .2s, background .2s; }
+    .symptom.checked { border-color: #9bd0b6; background: #edf8f1; }
+    .symptom input { width: 16px; height: 16px; margin: 0; accent-color: var(--green); }
+    .symptom span { line-height: 1.35; }
+    .form-error { margin-top: 18px; padding: 11px 13px; border-radius: 12px; background: var(--red-soft); color: #9d3e3e; font-size: 13px; line-height: 1.5; }
+    .primary-btn, .outline-btn, .danger-btn, .small-btn { border-radius: 12px; font-weight: 750; transition: transform .2s, background .2s, border-color .2s; }
+    .primary-btn:hover:not(:disabled), .outline-btn:hover:not(:disabled), .small-btn:hover:not(:disabled) { transform: translateY(-1px); }
+    .primary-btn { min-height: 47px; padding: 11px 18px; border: 1px solid var(--green); background: var(--green); color: #fff; }
+    .primary-btn:hover:not(:disabled) { background: var(--green-dark); }
+    .outline-btn { min-height: 42px; padding: 9px 14px; border: 1px solid #b9d8c8; background: #eff8f2; color: var(--green-dark); }
+    .danger-btn { min-height: 38px; padding: 8px 13px; border: 1px solid #f0d5d2; background: #fff8f7; color: #a34d49; }
+    .danger-btn:hover:not(:disabled) { background: #ffefed; }
+    .small-btn { min-height: 34px; padding: 6px 11px; border: 1px solid #e3e9e6; background: #fff; color: #6f8179; font-size: 12px; }
+    .submit-row { display: flex; align-items: center; gap: 16px; margin-top: 25px; }
+    .submit-row .primary-btn { flex: 1; }
+    .submit-row span { max-width: 200px; color: var(--muted); font-size: 11px; line-height: 1.5; }
+    .guide-card { padding: 26px; background: #fdfefd; }
+    .guide-card .eyebrow { color: var(--green); }
+    .guide-card h2 { margin: 0 0 18px; font-size: 20px; }
+    .guide-step { display: flex; gap: 12px; padding: 14px 0; border-top: 1px solid var(--line); }
+    .guide-step b { flex: none; width: 25px; height: 25px; display: grid; place-items: center; border-radius: 8px; background: #e8f4eb; color: var(--green); font-size: 12px; }
+    .guide-step strong { display: block; font-size: 13px; }
+    .guide-step p { margin: 3px 0 0; color: var(--muted); font-size: 12px; line-height: 1.55; }
+    .guide-note { margin-top: 18px; padding: 15px; border-radius: 14px; background: #f1f6f3; color: #58746a; font-size: 12px; line-height: 1.65; }
+    .results { margin-top: 22px; }
+    .result-header, .section-headline { display: flex; justify-content: space-between; align-items: center; gap: 18px; margin-bottom: 17px; }
+    .result-header h2, .section-headline h2 { margin: 0; font-size: 23px; }
+    .result-header .eyebrow, .section-headline .eyebrow { margin-bottom: 7px; color: var(--green); }
+    .result-layout { display: grid; grid-template-columns: 255px minmax(0, 1fr); gap: 16px; }
+    .lean-card { padding: 24px; border-radius: 21px; background: #163f36; color: #fff; }
+    .lean-card > span { color: #c6e5d4; font-size: 12px; }
+    .lean-card strong { display: block; margin-top: 15px; font-size: 49px; letter-spacing: -.04em; line-height: 1; }
+    .lean-card strong small { margin-left: 4px; font-size: 16px; font-weight: 500; letter-spacing: 0; }
+    .lean-card p { margin: 17px 0 0; color: #c3ddcf; font-size: 12px; line-height: 1.55; }
+    .macro-wrap { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+    .macro-card { min-width: 0; padding: 18px; border-radius: 21px; border: 1px solid var(--line); background: #fff; }
+    .macro-card.protein { border-color: #cce7da; background: #f2faf5; }
+    .macro-card.fat { border-color: #ece4da; background: #fff9ef; }
+    .macro-card.carb { border-color: #d9e8ed; background: #f2f8fa; }
+    .macro-label { display: block; color: #607a70; font-size: 12px; font-weight: 750; }
+    .macro-card strong { display: block; margin-top: 13px; color: #1a4639; font-size: 30px; letter-spacing: -.04em; }
+    .macro-card strong small { margin-left: 3px; font-size: 14px; font-weight: 500; }
+    .macro-card p { margin: 8px 0 0; color: #7e9189; font-size: 11px; }
+    .result-foot { margin: 12px 0 0; color: #788b82; font-size: 12px; line-height: 1.65; }
+    .advice-card { margin-top: 16px; padding: 24px; }
+    .advice-card h3 { margin: 0 0 14px; font-size: 17px; }
+    .advice-list { display: grid; gap: 10px; }
+    .advice-item { padding: 14px 16px; border-radius: 14px; border-left: 4px solid #87c9a2; background: #f4faf6; }
+    .advice-item.watch { border-left-color: var(--orange); background: #fff8ef; }
+    .advice-item.urgent { border-left-color: var(--red); background: #fff3f1; }
+    .advice-item strong { display: block; font-size: 13px; }
+    .advice-item p { margin: 5px 0 0; color: #5b6f67; font-size: 12px; line-height: 1.65; }
+    .history-card, .compare-card { min-height: 280px; }
+    .archive-list { display: grid; gap: 13px; }
+    .archive { padding: 19px; border: 1px solid var(--line); border-radius: 17px; background: #fbfdfb; }
+    .archive-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; }
+    .archive-date { display: block; font-size: 17px; font-weight: 800; }
+    .archive-sub { display: block; margin-top: 4px; color: var(--muted); font-size: 11px; }
+    .archive-metrics { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 15px; }
+    .archive-metrics span, .symptom-chip { padding: 7px 10px; border-radius: 9px; background: #eef4f0; color: #4c6c5e; font-size: 12px; }
+    .archive-feedback { margin-top: 12px; color: #70837a; font-size: 12px; line-height: 1.6; }
+    .archive-symptoms { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; }
+    .symptom-chip { background: var(--orange-soft); color: #9d6636; }
+    .empty { padding: 37px 20px; border: 1px dashed #cfddd5; border-radius: 17px; background: #fbfdfb; text-align: center; }
+    .empty-icon { display: block; margin-bottom: 10px; font-size: 27px; }
+    .empty strong { display: block; font-size: 15px; }
+    .empty p { margin: 6px 0 0; color: var(--muted); font-size: 12px; line-height: 1.6; }
+    .compare-form { display: grid; grid-template-columns: 1fr 1fr auto; gap: 13px; align-items: end; }
+    .compare-form .field { min-width: 0; }
+    .compare-form .primary-btn { white-space: nowrap; }
+    .compare-report { margin-top: 23px; }
+    .report-top { padding: 20px; border-radius: 17px; background: #ecf7f0; color: #275d48; }
+    .report-top.watch { background: #fff6e9; color: #875e2c; }
+    .report-top.urgent { background: #fff0ef; color: #963f3f; }
+    .report-top strong { display: block; font-size: 16px; }
+    .report-top p { margin: 8px 0 0; font-size: 13px; line-height: 1.7; }
+    .report-period { margin: 18px 0 13px; color: var(--muted); font-size: 12px; }
+    .report-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+    .report-metric { padding: 15px; border: 1px solid var(--line); border-radius: 13px; background: #fff; }
+    .report-metric small { display: block; color: var(--muted); font-size: 11px; }
+    .report-metric strong { display: block; margin-top: 8px; font-size: 14px; }
+    .report-metric span { display: inline-block; margin-top: 9px; padding: 4px 7px; border-radius: 6px; background: #eef4f0; color: var(--green-dark); font-size: 12px; font-weight: 750; }
+    .report-subhead { margin: 24px 0 12px; font-size: 15px; }
+    .symptom-change-list { display: grid; grid-template-columns: 1fr 1fr; gap: 9px; }
+    .symptom-change { display: flex; justify-content: space-between; gap: 10px; padding: 11px 13px; border-radius: 10px; background: #f5f8f6; font-size: 12px; }
+    .symptom-change.new { background: #fff0ef; color: #9c4744; }
+    .symptom-change.resolved { background: #ecf8ef; color: #27724d; }
+    .report-note { margin: 16px 0 0; color: #7e8f87; font-size: 11px; line-height: 1.65; }
+    .storage-warning { margin-bottom: 17px; padding: 13px 15px; border-radius: 12px; background: #fff2e8; color: #8f5c37; font-size: 13px; line-height: 1.6; }
+    .methods { margin-top: 22px; padding: 18px 21px; border: 1px solid var(--line); border-radius: 16px; background: #fff; color: #647a6e; font-size: 12px; line-height: 1.7; }
+    .methods summary { color: #2b6150; font-size: 13px; font-weight: 750; cursor: pointer; }
+    .methods p { margin: 12px 0 0; }
+    .methods a { color: var(--green); }
+    .footer { margin-top: 24px; color: #8b9d91; font-size: 11px; line-height: 1.65; text-align: center; }
+    .toast { position: fixed; z-index: 10; left: 50%; bottom: max(25px, env(safe-area-inset-bottom)); width: max-content; max-width: min(90vw, 420px); padding: 11px 17px; border-radius: 12px; background: #1e4e3e; color: #fff; font-size: 13px; box-shadow: 0 10px 28px rgba(13, 44, 30, .23); transform: translate(-50%, 20px); opacity: 0; pointer-events: none; transition: opacity .2s, transform .2s; }
+    .toast.show { transform: translate(-50%, 0); opacity: 1; }
+    .toast.error { background: #9e4646; }
+    @media (max-width: 820px) {
+      .content-grid { grid-template-columns: 1fr; }
+      .guide-card { display: none; }
+      .result-layout { grid-template-columns: 1fr; }
+      .lean-card { min-height: 160px; }
+    }
+    @media (max-width: 620px) {
+      .shell { padding: 18px 15px 50px; }
+      .masthead { margin-bottom: 17px; }
+      .intro { min-height: 190px; padding: 29px 24px; border-radius: 23px; }
+      .intro-art { display: none; }
+      .intro p { font-size: 13px; }
+      .tabs { width: 100%; margin: 19px 0; }
+      .tab { min-width: 0; flex: 1; padding: 11px 5px; font-size: 12px; }
+      .form-card, .history-card, .compare-card { padding: 20px; }
+      .card-header h2, .result-header h2, .section-headline h2 { font-size: 21px; }
+      .feedback-row { grid-template-columns: 76px minmax(0, 1fr) 53px; gap: 8px; padding: 12px; }
+      .feedback-row label { font-size: 12px; }
+      .result-header, .section-headline { align-items: flex-start; }
+      .result-header .outline-btn { font-size: 12px; }
+      .compare-form { grid-template-columns: 1fr 1fr; }
+      .compare-form .primary-btn { grid-column: 1 / -1; }
+      .report-grid { grid-template-columns: 1fr 1fr; }
+    }
+    @media (max-width: 380px) {
+      .brand-copy strong { font-size: 13px; }
+      .local-badge { padding: 7px 9px; font-size: 10px; }
+      .field-pair, .symptom-grid, .symptom-change-list { grid-template-columns: 1fr; }
+      .macro-wrap { gap: 6px; }
+      .macro-card { padding: 12px 8px; }
+      .macro-card strong { font-size: 24px; }
+      .submit-row { display: block; }
+      .submit-row span { display: block; margin-top: 10px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <header class="masthead">
+      <div class="brand" aria-hidden="true">IR</div>
+      <div class="brand-copy"><strong>胰岛素抵抗减脂与阶梯降碳助手</strong><span>记录身体反馈，观察变化趋势</span></div>
+      <span class="local-badge">仅存本机</span>
+    </header>
+
+    <section class="intro" aria-labelledby="introTitle">
+      <div class="intro-copy">
+        <span class="eyebrow">DAILY CHECK-IN · LOCAL JOURNAL</span>
+        <h1 id="introTitle">给身体反馈<br>留一个记录位置</h1>
+        <p>输入体重与体脂率，查看公式换算的营养素参考量；保存每日档案，再用两天的数据观察趋势。</p>
+      </div>
+      <div class="intro-art" aria-hidden="true"><span>蛋白</span><span>脂肪</span><span>碳水</span></div>
+    </section>
+
+    <nav class="tabs" role="tablist" aria-label="应用功能">
+      <button class="tab" id="tab-today" type="button" role="tab" aria-controls="panel-today" aria-selected="true" data-tab="today">今日打卡</button>
+      <button class="tab" id="tab-history" type="button" role="tab" aria-controls="panel-history" aria-selected="false" data-tab="history">历史档案</button>
+      <button class="tab" id="tab-compare" type="button" role="tab" aria-controls="panel-compare" aria-selected="false" data-tab="compare">数据对比</button>
+    </nav>
+
+    <div id="storageWarning" class="storage-warning" role="alert" hidden></div>
+
+    <main>
+      <section class="panel" id="panel-today" role="tabpanel" aria-labelledby="tab-today">
+        <div class="content-grid">
+          <form id="checkinForm" class="card form-card" novalidate>
+            <div class="card-header">
+              <div><span class="eyebrow">01 / TODAY</span><h2>今日打卡</h2><p>两项身体数据，加上你今天的真实感受。</p></div>
+              <span class="step-pill" aria-hidden="true">01</span>
+            </div>
+
+            <div class="field-pair">
+              <div class="field">
+                <label for="weightKg">体重 M</label>
+                <div class="input-wrap"><input id="weightKg" name="weightKg" type="number" inputmode="decimal" min="20" max="400" step="0.1" placeholder="例如 70.0" required><span>kg</span></div>
+              </div>
+              <div class="field">
+                <label for="bodyFatPct">体脂率 D</label>
+                <div class="input-wrap"><input id="bodyFatPct" name="bodyFatPct" type="number" inputmode="decimal" min="1" max="75" step="0.1" placeholder="例如 25.0" required><span>%</span></div>
+              </div>
+            </div>
+
+            <div class="subhead"><h3>身体反馈</h3><small>0 分低 · 10 分高</small></div>
+            <div class="feedback-list">
+              <div class="feedback-row">
+                <label for="mood">情绪指数</label>
+                <input id="mood" name="mood" type="range" min="0" max="10" value="5" aria-label="情绪指数">
+                <output class="range-value" for="mood"><span id="moodEmoji" class="range-emoji" aria-hidden="true">🙂</span><span id="moodValue">5 分</span></output>
+              </div>
+              <div class="feedback-row">
+                <label for="energy">精力指数</label>
+                <input id="energy" name="energy" type="range" min="0" max="10" value="5" aria-label="精力指数">
+                <output class="range-value" for="energy"><span id="energyEmoji" class="range-emoji" aria-hidden="true">🔋</span><span id="energyValue">5 分</span></output>
+              </div>
+              <div class="feedback-row">
+                <label for="sleepScore">睡眠质量</label>
+                <input id="sleepScore" name="sleepScore" type="range" min="0" max="10" value="5" aria-label="睡眠质量">
+                <output class="range-value" for="sleepScore"><span id="sleepEmoji" class="range-emoji" aria-hidden="true">😴</span><span id="sleepValue">5 分</span></output>
+              </div>
+            </div>
+
+            <div class="field sleep-field">
+              <label for="sleepDuration">昨晚睡眠时长</label>
+              <div class="select-wrap">
+                <select id="sleepDuration" name="sleepDuration" required>
+                  <option value="">请选择</option>
+                  <option value="lt6">&lt;6 小时</option>
+                  <option value="6to7">6–7 小时</option>
+                  <option value="7to8">7–8 小时</option>
+                  <option value="gt8">&gt;8 小时</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="subhead"><h3>今天有异常症状吗？</h3><small>可多选</small></div>
+            <div class="symptom-grid">
+              <label class="symptom"><input type="checkbox" name="symptom" value="dizzy"><span>头晕心慌</span></label>
+              <label class="symptom"><input type="checkbox" name="symptom" value="craving"><span>渴望甜食</span></label>
+              <label class="symptom"><input type="checkbox" name="symptom" value="hairLoss"><span>脱发增多</span></label>
+              <label class="symptom"><input type="checkbox" name="symptom" value="cold"><span>感冒</span></label>
+            </div>
+
+            <div id="formError" class="form-error" role="alert" hidden></div>
+            <div class="submit-row"><button class="primary-btn" type="submit">生成今日建议 →</button><span>结果只是公式换算与自我观察提示，不是处方。</span></div>
+          </form>
+
+          <aside class="card guide-card" aria-label="使用方法">
+            <span class="eyebrow">HOW IT WORKS</span><h2>三步看见趋势</h2>
+            <div class="guide-step"><b>1</b><div><strong>记录当下</strong><p>体重、体脂率和主观感受一起看。</p></div></div>
+            <div class="guide-step"><b>2</b><div><strong>查看参考配比</strong><p>按瘦体重换算蛋白质、脂肪与碳水。</p></div></div>
+            <div class="guide-step"><b>3</b><div><strong>比较两个日期</strong><p>观察瘦体重、精力和症状是否同步变化。</p></div></div>
+            <div class="guide-note">档案保存在当前浏览器的 localStorage 中。更换设备、浏览器或清理网站数据后，记录不会自动同步。</div>
+          </aside>
+        </div>
+
+        <section id="results" class="results" aria-labelledby="resultTitle" hidden>
+          <div class="result-header">
+            <div><span class="eyebrow">02 / PERSONAL SNAPSHOT</span><h2 id="resultTitle">今日参考结果</h2></div>
+            <button id="saveRecord" class="outline-btn" type="button">📁 保存为今日档案</button>
+          </div>
+          <div class="result-layout">
+            <div class="lean-card"><span>瘦体重 N · 估算</span><strong><span id="leanMassValue">--</span><small>kg</small></strong><p>N = 体重 × (1 − 体脂率)</p></div>
+            <div class="macro-wrap" aria-label="营养素参考克数">
+              <div class="macro-card protein"><span class="macro-label">蛋白质</span><strong><span id="proteinValue">--</span><small>g</small></strong><p>瘦体重 × 2</p></div>
+              <div class="macro-card fat"><span class="macro-label">脂肪</span><strong><span id="fatValue">--</span><small>g</small></strong><p>瘦体重 × 0.8</p></div>
+              <div class="macro-card carb"><span class="macro-label">碳水</span><strong><span id="carbValue">--</span><small>g</small></strong><p>瘦体重 × 3</p></div>
+            </div>
+          </div>
+          <p class="result-foot">“黄金配比”按你提供的公式计算，仅供记录和讨论；不表示适合每个人的实际摄入量，也不建议仅凭单日数据继续降碳。</p>
+          <div class="card advice-card"><h3>智能反馈提醒</h3><div id="adviceList" class="advice-list"></div></div>
+        </section>
+      </section>
+
+      <section class="panel" id="panel-history" role="tabpanel" aria-labelledby="tab-history" hidden>
+        <div class="card history-card">
+          <div class="section-headline">
+            <div><span class="eyebrow">YOUR JOURNAL</span><h2>档案历史记录</h2><p id="historyCount" class="result-foot"></p></div>
+            <button id="clearHistory" class="danger-btn" type="button">清空历史记录</button>
+          </div>
+          <div id="historyList" class="archive-list"></div>
+        </div>
+      </section>
+
+      <section class="panel" id="panel-compare" role="tabpanel" aria-labelledby="tab-compare" hidden>
+        <div class="card compare-card">
+          <div class="card-header">
+            <div><span class="eyebrow">COMPARE TWO DAYS</span><h2>数据对比</h2><p>选择两个不同日期，以基准日到当前日的顺序查看变化。</p></div>
+            <span class="step-pill" aria-hidden="true">03</span>
+          </div>
+          <div class="compare-form">
+            <div class="field"><label for="baseDate">对比基准日</label><div class="select-wrap"><select id="baseDate"></select></div></div>
+            <div class="field"><label for="currentDate">对比当前日</label><div class="select-wrap"><select id="currentDate"></select></div></div>
+            <button id="generateComparison" class="primary-btn" type="button">🔍 生成对比报告</button>
+          </div>
+          <div id="compareEmpty" class="empty" hidden><span class="empty-icon" aria-hidden="true">📊</span><strong>还需要两个不同日期的档案</strong><p>每天在“今日打卡”生成结果后保存一次，就能在这里比较。</p></div>
+          <div id="compareReport" class="compare-report" aria-live="polite" hidden></div>
+        </div>
+      </section>
+    </main>
+
+    <details class="methods">
+      <summary>计算方法、测量误差与安全说明</summary>
+      <p>瘦体重 = 体重 × (1 − 体脂率 ÷ 100)；蛋白质、脂肪和碳水分别按瘦体重 × 2、× 0.8、× 3 克展示。这是按需求设定的参考公式，并非适用于所有人的医学营养处方。</p>
+      <p>体脂秤读数可能受测量条件和水分影响，建议尽量在相似条件下记录。头晕心慌可能有多种原因；正在使用胰岛素或其他降糖药、患有肾病或处于妊娠期时，不应仅凭本页公式自行调整饮食。脱发持续增加也值得咨询医生。</p>
+      <p>参考：<a href="https://www.niddk.nih.gov/health-information/diabetes/overview/preventing-problems/low-blood-glucose-hypoglycemia" target="_blank" rel="noopener noreferrer">NIDDK 低血糖说明</a> · <a href="https://www.aad.org/public/diseases/hair-loss/treatment/tips" target="_blank" rel="noopener noreferrer">AAD 脱发建议</a> · <a href="https://pubmed.ncbi.nlm.nih.gov/37335581/" target="_blank" rel="noopener noreferrer">体脂测量与水分研究</a></p>
+    </details>
+    <footer class="footer">仅供健康记录与参考，不替代医生或营养师的个体化建议。所有档案仅保存在当前浏览器。</footer>
+  </div>
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+  <script>
+    (() => {
+      'use strict';
+
+      const RECORDS_KEY = 'ir-step-carb.records.v1';
+      const DRAFT_KEY = 'ir-step-carb.draft.v1';
+      const SYMPTOMS = [
+        { key: 'dizzy', label: '头晕心慌' },
+        { key: 'craving', label: '渴望甜食' },
+        { key: 'hairLoss', label: '脱发增多' },
+        { key: 'cold', label: '感冒' }
+      ];
+      const SLEEP_DURATIONS = {
+        lt6: '<6 小时',
+        '6to7': '6–7 小时',
+        '7to8': '7–8 小时',
+        gt8: '>8 小时'
+      };
+      const SLIDERS = [
+        { key: 'mood', low: '😔', middle: '🙂', high: '😄' },
+        { key: 'energy', low: '🪫', middle: '🔋', high: '⚡' },
+        { key: 'sleep', low: '🥱', middle: '😴', high: '🌙' }
+      ];
+      const get = (id) => document.getElementById(id);
+      const ui = {
+        form: get('checkinForm'),
+        weight: get('weightKg'),
+        bodyFat: get('bodyFatPct'),
+        mood: get('mood'),
+        energy: get('energy'),
+        sleepScore: get('sleepScore'),
+        sleepDuration: get('sleepDuration'),
+        formError: get('formError'),
+        results: get('results'),
+        leanMassValue: get('leanMassValue'),
+        proteinValue: get('proteinValue'),
+        fatValue: get('fatValue'),
+        carbValue: get('carbValue'),
+        adviceList: get('adviceList'),
+        saveRecord: get('saveRecord'),
+        historyList: get('historyList'),
+        historyCount: get('historyCount'),
+        clearHistory: get('clearHistory'),
+        baseDate: get('baseDate'),
+        currentDate: get('currentDate'),
+        generateComparison: get('generateComparison'),
+        compareEmpty: get('compareEmpty'),
+        compareReport: get('compareReport'),
+        storageWarning: get('storageWarning'),
+        toast: get('toast')
+      };
+      const state = {
+        records: [],
+        currentPlan: null,
+        storageReady: true,
+        storageCorrupt: false,
+        toastTimer: null
+      };
+
+      initialize();
+
+      function initialize() {
+        state.storageReady = storageAvailable();
+        if (state.storageReady) {
+          state.records = loadRecords();
+          restoreDraft();
+        }
+        updateStorageWarning();
+        updateFeedback();
+        updateSymptomStyles();
+        renderHistory();
+        refreshCompareSelectors();
+        switchTab('today');
+
+        document.querySelectorAll('.tab').forEach((tab) => {
+          tab.addEventListener('click', () => switchTab(tab.dataset.tab));
+        });
+        ui.form.addEventListener('input', onFormInput);
+        ui.form.addEventListener('submit', onFormSubmit);
+        ui.saveRecord.addEventListener('click', saveRecord);
+        ui.historyList.addEventListener('click', onHistoryClick);
+        ui.clearHistory.addEventListener('click', clearHistory);
+        ui.baseDate.addEventListener('change', clearComparison);
+        ui.currentDate.addEventListener('change', clearComparison);
+        ui.generateComparison.addEventListener('click', generateComparison);
+      }
+
+      function storageAvailable() {
+        try {
+          const probe = '__ir_step_carb_probe__';
+          localStorage.setItem(probe, '1');
+          localStorage.removeItem(probe);
+          return true;
+        } catch (error) {
+          return false;
+        }
+      }
+
+      function loadRecords() {
+        try {
+          const raw = localStorage.getItem(RECORDS_KEY);
+          if (!raw) return [];
+          const parsed = JSON.parse(raw);
+          if (!Array.isArray(parsed)) throw new Error('档案格式错误');
+          const records = parsed.map(normalizeRecord);
+          if (records.some((record) => record === null)) throw new Error('档案内容错误');
+          const uniqueRecords = new Map();
+          records.forEach((record) => uniqueRecords.set(record.date, record));
+          return Array.from(uniqueRecords.values()).sort((left, right) => right.date.localeCompare(left.date));
+        } catch (error) {
+          state.storageCorrupt = true;
+          return [];
+        }
+      }
+
+      function normalizeRecord(record) {
+        if (!record || typeof record !== 'object' || typeof record.date !== 'string' ||
+            !/^\d{4}-\d{2}-\d{2}$/.test(record.date)) return null;
+        const weightKg = Number(record.weightKg);
+        const bodyFatPct = Number(record.bodyFatPct);
+        const leanKg = Number(record.leanKg);
+        const macros = record.macros || {};
+        const scores = record.scores || {};
+        if (!Number.isFinite(weightKg) || weightKg < 20 || weightKg > 400 ||
+            !Number.isFinite(bodyFatPct) || bodyFatPct < 1 || bodyFatPct > 75 ||
+            !Number.isFinite(leanKg) || leanKg <= 0 ||
+            !Number.isFinite(Number(macros.proteinG)) || Number(macros.proteinG) <= 0 ||
+            !Number.isFinite(Number(macros.fatG)) || Number(macros.fatG) <= 0 ||
+            !Number.isFinite(Number(macros.carbG)) || Number(macros.carbG) <= 0 ||
+            !['mood', 'energy', 'sleep'].every((key) => Number.isInteger(scores[key]) && scores[key] >= 0 && scores[key] <= 10) ||
+            !Object.prototype.hasOwnProperty.call(SLEEP_DURATIONS, record.sleepDuration) ||
+            !Array.isArray(record.symptoms)) return null;
+        return {
+          date: record.date,
+          savedAt: typeof record.savedAt === 'string' ? record.savedAt : '',
+          weightKg,
+          bodyFatPct,
+          leanKg,
+          macros: {
+            proteinG: Number(macros.proteinG),
+            fatG: Number(macros.fatG),
+            carbG: Number(macros.carbG)
+          },
+          scores: { mood: scores.mood, energy: scores.energy, sleep: scores.sleep },
+          sleepDuration: record.sleepDuration,
+          symptoms: Array.from(new Set(record.symptoms.filter((key) => SYMPTOMS.some((symptom) => symptom.key === key))))
+        };
+      }
+
+      function restoreDraft() {
+        try {
+          const raw = localStorage.getItem(DRAFT_KEY);
+          if (!raw) return;
+          const draft = JSON.parse(raw);
+          if (!draft || typeof draft !== 'object') return;
+          if (draft.weightKg !== undefined) ui.weight.value = draft.weightKg;
+          if (draft.bodyFatPct !== undefined) ui.bodyFat.value = draft.bodyFatPct;
+          if (Object.prototype.hasOwnProperty.call(SLEEP_DURATIONS, draft.sleepDuration)) {
+            ui.sleepDuration.value = draft.sleepDuration;
+          }
+          SLIDERS.forEach((slider) => {
+            const value = Number(draft[slider.key]);
+            if (Number.isInteger(value) && value >= 0 && value <= 10) {
+              get(slider.key === 'sleep' ? 'sleepScore' : slider.key).value = value;
+            }
+          });
+          if (Array.isArray(draft.symptoms)) {
+            ui.form.querySelectorAll('input[name="symptom"]').forEach((checkbox) => {
+              checkbox.checked = draft.symptoms.includes(checkbox.value);
+            });
+          }
+        } catch (error) {
+          return;
+        }
+      }
+
+      function saveDraft() {
+        if (!state.storageReady) return;
+        const draft = {
+          weightKg: ui.weight.value,
+          bodyFatPct: ui.bodyFat.value,
+          mood: Number(ui.mood.value),
+          energy: Number(ui.energy.value),
+          sleep: Number(ui.sleepScore.value),
+          sleepDuration: ui.sleepDuration.value,
+          symptoms: selectedSymptoms()
+        };
+        try {
+          localStorage.setItem(DRAFT_KEY, JSON.stringify(draft));
+        } catch (error) {
+          state.storageReady = false;
+          updateStorageWarning();
+        }
+      }
+
+      function updateStorageWarning() {
+        if (!state.storageReady) {
+          ui.storageWarning.textContent = '当前浏览器不允许本地存储。仍可计算，但无法保存档案；请在允许本地存储的浏览器中打开本页面。';
+          ui.storageWarning.hidden = false;
+        } else if (state.storageCorrupt) {
+          ui.storageWarning.textContent = '本地历史数据格式异常。为避免覆盖原数据，已暂停保存；可在“历史档案”中确认清空损坏数据。';
+          ui.storageWarning.hidden = false;
+        } else {
+          ui.storageWarning.hidden = true;
+        }
+        ui.saveRecord.disabled = !state.storageReady || state.storageCorrupt;
+      }
+
+      function switchTab(name) {
+        document.querySelectorAll('.tab').forEach((tab) => {
+          const active = tab.dataset.tab === name;
+          tab.setAttribute('aria-selected', String(active));
+          tab.tabIndex = active ? 0 : -1;
+        });
+        ['today', 'history', 'compare'].forEach((panelName) => {
+          get('panel-' + panelName).hidden = panelName !== name;
+        });
+      }
+
+      function onFormInput() {
+        state.currentPlan = null;
+        ui.results.hidden = true;
+        ui.formError.hidden = true;
+        updateFeedback();
+        updateSymptomStyles();
+        saveDraft();
+      }
+
+      function updateFeedback() {
+        SLIDERS.forEach((slider) => {
+          const input = get(slider.key === 'sleep' ? 'sleepScore' : slider.key);
+          const score = Number(input.value);
+          const emoji = score <= 3 ? slider.low : score <= 6 ? slider.middle : slider.high;
+          input.style.setProperty('--fill', String(score * 10) + '%');
+          get(slider.key + 'Emoji').textContent = emoji;
+          get(slider.key + 'Value').textContent = String(score) + ' 分';
+        });
+      }
+
+      function updateSymptomStyles() {
+        ui.form.querySelectorAll('.symptom').forEach((label) => {
+          label.classList.toggle('checked', label.querySelector('input').checked);
+        });
+      }
+
+      function selectedSymptoms() {
+        return Array.from(ui.form.querySelectorAll('input[name="symptom"]:checked'), (checkbox) => checkbox.value);
+      }
+
+      function readForm() {
+        const weightKg = Number(ui.weight.value);
+        const bodyFatPct = Number(ui.bodyFat.value);
+        if (!ui.weight.value || !Number.isFinite(weightKg) || weightKg < 20 || weightKg > 400) {
+          throw new Error('请输入 20–400 kg 范围内的体重。');
+        }
+        if (!ui.bodyFat.value || !Number.isFinite(bodyFatPct) || bodyFatPct < 1 || bodyFatPct > 75) {
+          throw new Error('请输入 1–75% 范围内的体脂率，例如 25。');
+        }
+        if (!Object.prototype.hasOwnProperty.call(SLEEP_DURATIONS, ui.sleepDuration.value)) {
+          throw new Error('请选择昨晚的睡眠时长。');
+        }
+        return {
+          weightKg,
+          bodyFatPct,
+          scores: {
+            mood: Number(ui.mood.value),
+            energy: Number(ui.energy.value),
+            sleep: Number(ui.sleepScore.value)
+          },
+          sleepDuration: ui.sleepDuration.value,
+          symptoms: selectedSymptoms()
+        };
+      }
+
+      function calculatePlan(form) {
+        const leanKg = form.weightKg * (1 - form.bodyFatPct / 100);
+        return {
+          form,
+          leanKg,
+          macros: {
+            proteinG: leanKg * 2,
+            fatG: leanKg * 0.8,
+            carbG: leanKg * 3
+          },
+          advice: generateAdvice(form)
+        };
+      }
+
+      function generateAdvice(form) {
+        const advice = [];
+        const symptoms = form.symptoms;
+        if (symptoms.includes('dizzy')) {
+          advice.push({
+            level: 'urgent',
+            title: '先处理头晕心慌',
+            body: '先暂停继续降碳。头晕、心慌可能有多种原因，包括低血糖；若正使用降糖药，可按既有医疗方案测血糖并处理。症状持续、加重或明显不适时及时就医。'
+          });
+        }
+        if (symptoms.includes('hairLoss')) {
+          advice.push({
+            level: 'watch',
+            title: '脱发增多：暂停降碳',
+            body: '先检查总能量、蛋白质及铁等营养摄入。持续脱发需要医生评估，不宜只靠增加某一种营养素解决。'
+          });
+        }
+        if (form.scores.energy <= 3) {
+          advice.push({
+            level: 'watch',
+            title: '精力偏低：先别继续减碳',
+            body: '先确认是否规律进餐、摄入是否充足。若只是轻度乏力，可在正餐增加一小份全谷物或豆类等碳水，并观察身体反应。'
+          });
+        }
+        if (form.scores.mood <= 3) {
+          advice.push({
+            level: 'watch',
+            title: '情绪偏低：关注饮食压力',
+            body: '避免进一步压低碳水摄入；尽量保持规律三餐。若情绪低落持续或影响生活，寻求专业支持。'
+          });
+        }
+        if (form.scores.sleep <= 3 || form.sleepDuration === 'lt6') {
+          advice.push({
+            level: 'watch',
+            title: '睡眠欠佳：优先恢复',
+            body: '先保证睡眠时间与总能量。若近期脂肪摄入很少，可在正餐加入少量坚果、橄榄油等健康脂肪；这不等于治疗睡眠问题。'
+          });
+        }
+        if (symptoms.includes('craving')) {
+          advice.push({
+            level: 'watch',
+            title: '想吃甜食：观察饥饿与餐次',
+            body: '单凭渴望甜食无法判断碳水不足。优先规律进餐、选择高纤维主食；若饥饿明显，可适当增加一小份复合碳水。'
+          });
+        }
+        if (symptoms.includes('cold')) {
+          advice.push({
+            level: 'watch',
+            title: '感冒期间：先照顾恢复',
+            body: '先保证正常进食、饮水和休息，暂缓进一步减少食物或碳水；症状明显或持续时就医。'
+          });
+        }
+        if (advice.length === 0) {
+          advice.push({
+            level: 'good',
+            title: '今天未触发额外预警',
+            body: '继续观察多日趋势。单次评分和体脂率不能证明当前配比一定适合你，也无需根据一天的波动急着调整。'
+          });
+        }
+        return advice;
+      }
+
+      function onFormSubmit(event) {
+        event.preventDefault();
+        try {
+          state.currentPlan = calculatePlan(readForm());
+          renderPlan(state.currentPlan);
+          ui.formError.hidden = true;
+          ui.results.hidden = false;
+          ui.saveRecord.textContent = state.records.some((record) => record.date === localDate())
+            ? '📁 更新今日档案'
+            : '📁 保存为今日档案';
+          ui.results.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        } catch (error) {
+          state.currentPlan = null;
+          ui.results.hidden = true;
+          ui.formError.textContent = error.message;
+          ui.formError.hidden = false;
+        }
+      }
+
+      function renderPlan(plan) {
+        ui.leanMassValue.textContent = oneDecimal(plan.leanKg);
+        ui.proteinValue.textContent = oneDecimal(plan.macros.proteinG);
+        ui.fatValue.textContent = oneDecimal(plan.macros.fatG);
+        ui.carbValue.textContent = oneDecimal(plan.macros.carbG);
+        ui.adviceList.replaceChildren();
+        plan.advice.forEach((item) => {
+          const card = make('div', 'advice-item ' + item.level);
+          card.append(make('strong', '', item.title), make('p', '', item.body));
+          ui.adviceList.append(card);
+        });
+      }
+
+      function localDate() {
+        const today = new Date();
+        const month = String(today.getMonth() + 1).padStart(2, '0');
+        const day = String(today.getDate()).padStart(2, '0');
+        return String(today.getFullYear()) + '-' + month + '-' + day;
+      }
+
+      function saveRecord() {
+        if (!state.currentPlan || !state.storageReady || state.storageCorrupt) return;
+        const date = localDate();
+        const existing = state.records.some((record) => record.date === date);
+        if (existing && !window.confirm('今天已有一份档案。确定用当前数据更新吗？')) return;
+        const plan = state.currentPlan;
+        const record = {
+          date,
+          savedAt: new Date().toISOString(),
+          weightKg: plan.form.weightKg,
+          bodyFatPct: plan.form.bodyFatPct,
+          leanKg: plan.leanKg,
+          macros: { ...plan.macros },
+          scores: { ...plan.form.scores },
+          sleepDuration: plan.form.sleepDuration,
+          symptoms: [...plan.form.symptoms]
+        };
+        const nextRecords = [record, ...state.records.filter((item) => item.date !== date)]
+          .sort((left, right) => right.date.localeCompare(left.date));
+        if (commitRecords(nextRecords)) {
+          ui.saveRecord.textContent = '📁 更新今日档案';
+          flash(existing ? '今日档案已更新' : '今日档案已保存');
+        }
+      }
+
+      function commitRecords(records) {
+        try {
+          localStorage.setItem(RECORDS_KEY, JSON.stringify(records));
+          state.records = records;
+          renderHistory();
+          refreshCompareSelectors();
+          return true;
+        } catch (error) {
+          flash('保存失败：浏览器本地存储不可用或空间不足', true);
+          return false;
+        }
+      }
+
+      function renderHistory() {
+        ui.historyList.replaceChildren();
+        ui.historyCount.textContent = '共 ' + state.records.length + ' 份档案 · 同一天再次保存会更新当天记录';
+        ui.clearHistory.disabled = !state.storageReady || (state.records.length === 0 && !state.storageCorrupt);
+        if (state.records.length === 0) {
+          const empty = make('div', 'empty');
+          empty.append(make('span', 'empty-icon', '📁'), make('strong', '', '还没有历史档案'),
+            make('p', '', '去“今日打卡”生成结果，点击保存即可开始记录。'));
+          ui.historyList.append(empty);
+          return;
+        }
+        state.records.forEach((record) => {
+          const card = make('article', 'archive');
+          const header = make('div', 'archive-head');
+          const heading = make('div');
+          heading.append(make('strong', 'archive-date', displayDate(record.date)),
+            make('span', 'archive-sub', '睡眠时长 ' + SLEEP_DURATIONS[record.sleepDuration]));
+          const deleteButton = make('button', 'small-btn', '删除');
+          deleteButton.type = 'button';
+          deleteButton.dataset.deleteDate = record.date;
+          deleteButton.setAttribute('aria-label', '删除 ' + displayDate(record.date) + ' 的档案');
+          header.append(heading, deleteButton);
+          card.append(header);
+          const metrics = make('div', 'archive-metrics');
+          [
+            '体重 ' + oneDecimal(record.weightKg) + ' kg',
+            '体脂 ' + oneDecimal(record.bodyFatPct) + '%',
+            '瘦体重 ' + oneDecimal(record.leanKg) + ' kg',
+            '蛋白 ' + oneDecimal(record.macros.proteinG) + ' g',
+            '脂肪 ' + oneDecimal(record.macros.fatG) + ' g',
+            '碳水 ' + oneDecimal(record.macros.carbG) + ' g'
+          ].forEach((value) => metrics.append(make('span', '', value)));
+          card.append(metrics);
+          card.append(make('div', 'archive-feedback',
+            '情绪 ' + record.scores.mood + ' 分 · 精力 ' + record.scores.energy +
+            ' 分 · 睡眠 ' + record.scores.sleep + ' 分'));
+          const symptoms = make('div', 'archive-symptoms');
+          if (record.symptoms.length === 0) {
+            symptoms.append(make('span', 'symptom-chip', '无已选异常症状'));
+          } else {
+            record.symptoms.forEach((key) => {
+              const symptom = SYMPTOMS.find((item) => item.key === key);
+              symptoms.append(make('span', 'symptom-chip', symptom.label));
+            });
+          }
+          card.append(symptoms);
+          ui.historyList.append(card);
+        });
+      }
+
+      function onHistoryClick(event) {
+        const button = event.target.closest('[data-delete-date]');
+        if (!button) return;
+        const date = button.dataset.deleteDate;
+        if (!window.confirm('确定删除 ' + displayDate(date) + ' 的档案吗？此操作不可恢复。')) return;
+        const nextRecords = state.records.filter((record) => record.date !== date);
+        if (commitRecords(nextRecords)) {
+          flash('档案已删除');
+          if (date === localDate() && state.currentPlan) ui.saveRecord.textContent = '📁 保存为今日档案';
+        }
+      }
+
+      function clearHistory() {
+        if (!state.storageReady) return;
+        if (!window.confirm('确定清空所有历史档案吗？此操作不可恢复。')) return;
+        try {
+          localStorage.removeItem(RECORDS_KEY);
+          state.records = [];
+          state.storageCorrupt = false;
+          updateStorageWarning();
+          renderHistory();
+          refreshCompareSelectors();
+          if (state.currentPlan) ui.saveRecord.textContent = '📁 保存为今日档案';
+          flash('历史档案已清空');
+        } catch (error) {
+          flash('清空失败，请检查浏览器的存储权限', true);
+        }
+      }
+
+      function refreshCompareSelectors() {
+        const oldBase = ui.baseDate.value;
+        const oldCurrent = ui.currentDate.value;
+        [ui.baseDate, ui.currentDate].forEach((select) => {
+          select.replaceChildren(new Option('请选择日期', ''));
+          state.records.forEach((record) => {
+            select.add(new Option(displayDate(record.date), record.date));
+          });
+        });
+        const knownDates = state.records.map((record) => record.date);
+        ui.baseDate.value = knownDates.includes(oldBase) ? oldBase : (knownDates[1] || '');
+        ui.currentDate.value = knownDates.includes(oldCurrent) ? oldCurrent : (knownDates[0] || '');
+        if (ui.baseDate.value === ui.currentDate.value && knownDates.length >= 2) {
+          ui.baseDate.value = knownDates.find((date) => date !== ui.currentDate.value);
+        }
+        ui.generateComparison.disabled = state.records.length < 2;
+        ui.compareEmpty.hidden = state.records.length >= 2;
+        clearComparison();
+      }
+
+      function clearComparison() {
+        ui.compareReport.hidden = true;
+        ui.compareReport.replaceChildren();
+      }
+
+      function generateComparison() {
+        const base = state.records.find((record) => record.date === ui.baseDate.value);
+        const current = state.records.find((record) => record.date === ui.currentDate.value);
+        if (!base || !current || base.date === current.date) {
+          flash('请选择两个不同日期的档案', true);
+          return;
+        }
+        const changes = {
+          weight: current.weightKg - base.weightKg,
+          bodyFat: current.bodyFatPct - base.bodyFatPct,
+          lean: current.leanKg - base.leanKg,
+          mood: current.scores.mood - base.scores.mood,
+          energy: current.scores.energy - base.scores.energy,
+          sleep: current.scores.sleep - base.scores.sleep
+        };
+        const overall = evaluateComparison(base, current, changes);
+        ui.compareReport.replaceChildren();
+        const summary = make('div', 'report-top ' + overall.level);
+        summary.append(make('strong', '', overall.title), make('p', '', overall.text));
+        ui.compareReport.append(summary);
+        ui.compareReport.append(make('p', 'report-period',
+          displayDate(base.date) + ' → ' + displayDate(current.date)));
+        const grid = make('div', 'report-grid');
+        [
+          ['体重', oneDecimal(base.weightKg) + ' → ' + oneDecimal(current.weightKg) + ' kg', signedDecimal(changes.weight) + ' kg'],
+          ['体脂率', oneDecimal(base.bodyFatPct) + '% → ' + oneDecimal(current.bodyFatPct) + '%', signedDecimal(changes.bodyFat) + ' 个百分点'],
+          ['瘦体重', oneDecimal(base.leanKg) + ' → ' + oneDecimal(current.leanKg) + ' kg', signedDecimal(changes.lean) + ' kg'],
+          ['情绪指数', base.scores.mood + ' → ' + current.scores.mood + ' 分', signedInteger(changes.mood) + ' 分'],
+          ['精力指数', base.scores.energy + ' → ' + current.scores.energy + ' 分', signedInteger(changes.energy) + ' 分'],
+          ['睡眠质量', base.scores.sleep + ' → ' + current.scores.sleep + ' 分', signedInteger(changes.sleep) + ' 分']
+        ].forEach((metric) => {
+          const card = make('div', 'report-metric');
+          card.append(make('small', '', metric[0]), make('strong', '', metric[1]), make('span', '', metric[2]));
+          grid.append(card);
+        });
+        ui.compareReport.append(grid, make('h3', 'report-subhead', '异常症状变化'));
+        const symptomList = make('div', 'symptom-change-list');
+        SYMPTOMS.forEach((symptom) => {
+          const before = base.symptoms.includes(symptom.key);
+          const after = current.symptoms.includes(symptom.key);
+          const status = !before && after ? 'new' : before && !after ? 'resolved' : '';
+          const row = make('div', 'symptom-change ' + status);
+          row.append(make('span', '', symptom.label),
+            make('strong', '', (before ? '有' : '无') + ' → ' + (after ? '有' : '无')));
+          symptomList.append(row);
+        });
+        ui.compareReport.append(symptomList);
+        ui.compareReport.append(make('p', 'report-note',
+          '瘦体重由体重与体脂率推算，体脂秤读数可能受水分和测量条件影响。请尽量在相似条件下测量，避免依据一次对比做医疗判断。'));
+        ui.compareReport.hidden = false;
+        ui.compareReport.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      }
+
+      function evaluateComparison(base, current, changes) {
+        const newSymptoms = current.symptoms.filter((key) => !base.symptoms.includes(key));
+        if (current.symptoms.includes('dizzy')) {
+          return {
+            level: 'urgent',
+            title: '先关注头晕心慌，再考虑降碳',
+            text: '当前档案记录了头晕心慌。体重和营养素变化无法解释这一症状；先暂停进一步降碳，并根据实际情况测血糖或就医。'
+          };
+        }
+        if (current.symptoms.includes('hairLoss') || changes.energy <= -2 ||
+            changes.sleep <= -2 || changes.mood <= -2 || newSymptoms.length > 0) {
+          return {
+            level: 'watch',
+            title: '身体反馈出现需要关注的变化',
+            text: '有症状新增或主观状态下降。建议先检查睡眠、进食是否充足，并暂停进一步减少碳水；如症状持续，请咨询专业人员。'
+          };
+        }
+        if (changes.weight < -0.1 && changes.lean < -0.3) {
+          return {
+            level: 'watch',
+            title: '体重下降，同时估算瘦体重也下降',
+            text: '可先复核体脂测量条件，并关注蛋白质、总摄入量和力量活动。单次差异不能确认真实肌肉流失。'
+          };
+        }
+        if (changes.weight < -0.1 && changes.lean >= -0.3 &&
+            changes.mood >= 0 && changes.energy >= 0 && changes.sleep >= 0 &&
+            newSymptoms.length === 0) {
+          return {
+            level: 'good',
+            title: '体重下降，主观状态未变差',
+            text: '这是值得继续观察的趋势，但两次记录仍不足以判断当前碳水配比“完美”。建议保持规律记录，不急于进一步降碳。'
+          };
+        }
+        return {
+          level: 'good',
+          title: '继续观察多日趋势',
+          text: '体重、体脂和主观状态的短期变化可能不同步。建议结合更多日期与症状变化，再决定是否调整饮食。'
+        };
+      }
+
+      function displayDate(date) {
+        const parts = date.split('-');
+        return parts[0] + ' 年 ' + Number(parts[1]) + ' 月 ' + Number(parts[2]) + ' 日';
+      }
+
+      function oneDecimal(value) {
+        return Number(value).toFixed(1);
+      }
+
+      function signedDecimal(value) {
+        const rounded = Math.abs(value) < 0.05 ? 0 : value;
+        return (rounded > 0 ? '+' : '') + oneDecimal(rounded);
+      }
+
+      function signedInteger(value) {
+        return (value > 0 ? '+' : '') + String(value);
+      }
+
+      function make(tag, className, text) {
+        const node = document.createElement(tag);
+        if (className) node.className = className;
+        if (text !== undefined) node.textContent = text;
+        return node;
+      }
+
+      function flash(message, isError) {
+        clearTimeout(state.toastTimer);
+        ui.toast.textContent = message;
+        ui.toast.className = 'toast show' + (isError ? ' error' : '');
+        state.toastTimer = setTimeout(() => {
+          ui.toast.className = 'toast';
+        }, 3200);
+      }
+    })();
+  </script>
+</body>
+</html>
